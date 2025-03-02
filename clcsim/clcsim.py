@@ -5,7 +5,7 @@ from pytransit import RRModel
 from pytransit.orbits import fold, i_from_baew
 from numpy import ceil, linspace, ndarray
 
-CHEOPS_ORBIT = 98 * u.min
+CHEOPS_ORBIT = 99 * u.min
 
 
 class LCSim:
@@ -22,14 +22,14 @@ class LCSim:
         self.tm.set_data(self.time)
 
     def __call__(self, k: float, t0: float, p: float, a: float, b: float, e: float, w: float,
-                 limb_darkening: list | tuple | ndarray, efficiency: float, shift: float):
+                 limb_darkening: list | tuple | ndarray, efficiency: float, eff_phase: float):
         if not (0.0 <= efficiency <= 1):
             raise ValueError("Efficiency must be between 0 and 1.")
 
         i = i_from_baew(b, a, e, w)
         flux = self.tm.evaluate(k, limb_darkening, t0, p, a, i, e, w) + normal(0.0, self.white_noise, size=self.nexp)
 
-        phase = fold(self.time, CHEOPS_ORBIT.to(u.d).value, shift=-shift) / CHEOPS_ORBIT.to(u.d).value
+        phase = fold(self.time, CHEOPS_ORBIT.to(u.d).value, shift=-eff_phase) / CHEOPS_ORBIT.to(u.d).value
         mask = abs(phase) > 0.5 * (1 - efficiency)
 
         return self.time[mask], flux[mask]
