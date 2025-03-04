@@ -3,10 +3,12 @@ from typing import Literal
 from astropy import units as u
 from numpy.random import normal
 
+from meepmeep import Orbit
 from pytransit import RRModel, EclipseModel
 from pytransit.models.numba.phasecurves import lambert_phase_function, emission
 from pytransit.orbits import fold, i_from_baew
 from numpy import ceil, linspace, ndarray, squeeze
+from pytransit.orbits.orbits_py import impact_parameter
 
 CHEOPS_ORBIT = 99 * u.min
 
@@ -35,8 +37,13 @@ class LCSim:
         total number of exposures.
     """
 
-    def __init__(self, window_width: float, exp_time: float, white_noise: float,
-                 limb_darkening_model: Literal["quadratic", "power-2", "power-2-pm"] = "quadratic"):
+    def __init__(
+        self,
+        window_width: float,
+        exp_time: float,
+        white_noise: float,
+        limb_darkening_model: Literal["quadratic", "power-2", "power-2-pm"] = "quadratic",
+    ):
         """Simple CHEOPS Light Curve Simulator.
 
         Parameters
@@ -60,8 +67,10 @@ class LCSim:
 
         self._tm = RRModel(ldmodel=limb_darkening_model, small_planet_limit=0.001)
         self._em = EclipseModel()
+        self._orbit = Orbit(25)
         self._tm.set_data(self.time)
         self._em.set_data(self.time)
+        self._orbit.set_data(self.time)
 
     def __call__(
         self,
@@ -74,8 +83,6 @@ class LCSim:
         argument_of_periastron: float = 0.0,
         limb_darkening: list | tuple | ndarray = (0.2, 0.3),
         geometric_albedo: float = 0.0,
-        fratio_day: float = 0.0,
-        fratio_night: float = 0.0,
         efficiency: float = 0.8,
         eff_phase: float = 0.0,
     ):
@@ -107,10 +114,6 @@ class LCSim:
             Coefficients for the limb darkening law.
         geometric_albedo
             Geometric albedo of the planet.
-        fratio_day
-            Day-side flux ratio of the emission component.
-        fratio_night
-            Night-side flux ratio of the emission component.
         efficiency
             Observing efficiency, with a range [0.0, 1.0].
         eff_phase
@@ -120,39 +123,21 @@ class LCSim:
         -------
         tuple of ndarray
             Tuple containing:
-                - Masked array of times that meet the efficiency filtering criteria.
-                - Masked flux values corresponding to the selected times.
+                - Array of mid-exposure times.
+                - Array of simulated fluxes.
         """
         if not (0.0 <= efficiency <= 1.0):
             raise ValueError("Efficiency must be between 0 and 1.")
 
-        i = i_from_baew(impact_parameter, scaled_semi_major_axis, eccentricity, argument_of_periastron)
-        f_transit = self._tm.evaluate(
-            radius_ratio,
-            limb_darkening,
-            zero_epoch,
-            period,
-            scaled_semi_major_axis,
-            i,
-            eccentricity,
-            argument_of_periastron,
-        )
-        f_eclipse = self._em.evaluate(
-            radius_ratio,
-            zero_epoch,
-            period,
-            scaled_semi_major_axis,
-            i,
-            eccentricity,
-            argument_of_periastron,
-            multiplicative=True,
-        )
-        f_reflection = lambert_phase_function(
-            scaled_semi_major_axis, radius_ratio**2, geometric_albedo, zero_epoch, period, x_is_time=True, x=self.time
-        )
-        f_emission = emission(
-            radius_ratio**2, fratio_night, fratio_day, 0.0, zero_epoch, period, x_is_time=True, x=self.time
-        )
+        k, t0, p, a, e, w = radius_ratio, zero_epoch, period, scaled_semi_major_axis, eccentricity, argument_of_periastron
+
+        i = i_from_baew(impact_parameter, a, e, w)
+        self._orbit.set_pars(t0, p, a, i, e, w)
+        phase = self._orbit.phase()
+
+        f_transit = self._tm.evaluate(radius_ratio, limb_darkening, t0, p, a, i, e, w)
+        f_eclipse = self._em.evaluate(radius_ratio, t0, p, a, i, e, w, multiplicative=True)
+        f_reflection, f_emission = self._orbit.lambert_and_emission(k, geometric_albedo, 0.0, 0.0)
         f_noise = normal(0.0, self.white_noise, size=self.nexp)
         flux = f_transit + squeeze(f_eclipse * (f_reflection + f_emission)) + f_noise
 
