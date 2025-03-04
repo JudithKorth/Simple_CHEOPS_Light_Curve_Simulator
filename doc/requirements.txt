@@ -1,0 +1,16 @@
+ipykernel
+nbsphinx
+furo
+numpydoc
+sphinx-copybutton
+pytransit
+meepmeep
+numpy
+scipy
+numba
+matplotlib
+celerite2
+pandas
+xarray
+seaborn
+astropy
