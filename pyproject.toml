@@ -1,0 +1,36 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clcsim"
+description = "A simple CHEOPS light curve simulator that creates transit and phase-curve light curves."
+authors=[{name='Judith Korth', email='judithkorth@gmail.com'},
+         {name='Hannu Parviainen', email='hpparvi@gmail.com'}]
+classifiers=[
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+readme = "README.md"
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.10"
+license = {text = "GPLv3"}
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+version = {attr = "clcsim.__version__"}
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["clcsim"]
+namespaces = true
