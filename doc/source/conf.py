@@ -1,14 +1,14 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-import clcsim
+import cheopslcs
 
 project = 'Simple CHEOPS light curve simulator'
 copyright = '2025, Judith Korth and Hannu Parviainen'
 author = 'Judith Korth and Hannu Parviainen'
 
-version = ".".join(clcsim.__version__.split('.')[:2])
-release = clcsim.__version__
+version = ".".join(cheopslcs.__version__.split('.')[:2])
+release = cheopslcs.__version__
 
 extensions = [
     'sphinx.ext.autodoc',

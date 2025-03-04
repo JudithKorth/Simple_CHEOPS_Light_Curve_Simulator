@@ -29,4 +29,4 @@
 
 __version__ = '0.9'
 
-from .clcsim import LCSim
+from .lcsim import LCSim

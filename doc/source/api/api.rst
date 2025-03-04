@@ -1,12 +1,11 @@
-.. _api.lcsim
+.. _api.cheopslcs
 
 LCSim
 =====
-.. currentmodule:: clcsim.clcsim
+.. currentmodule:: cheopslcs.lcsim
 
 .. autosummary::
     :toctree: api/
 
     LCSim
     LCSim.__call__
-

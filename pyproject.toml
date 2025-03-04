@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "clcsim"
+name = "cheopslcs"
 description = "A simple CHEOPS light curve simulator that creates transit and phase-curve light curves."
 authors=[{name='Judith Korth', email='judithkorth@gmail.com'},
          {name='Hannu Parviainen', email='hpparvi@gmail.com'}]
@@ -26,11 +26,11 @@ license = {text = "GPLv3"}
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
-version = {attr = "clcsim.__version__"}
+version = {attr = "cheopslcs.__version__"}
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["clcsim"]
+include = ["cheopslcs"]
 namespaces = true
