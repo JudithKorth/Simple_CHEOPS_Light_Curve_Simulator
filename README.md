@@ -10,7 +10,7 @@ A simple Python package to simulate CHEOPS light curves for transits, eclipses, 
 
 Install from PyPI
 
-    pip install clcsim
+    pip install cheopslcs
 
 ## Contributing
 
