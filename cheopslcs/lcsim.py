@@ -139,7 +139,8 @@ class LCSim:
         f_eclipse = self._em.evaluate(radius_ratio, t0, p, a, i, e, w, multiplicative=True)
         f_reflection, f_emission = self._orbit.lambert_and_emission(k, geometric_albedo, 0.0, 0.0)
         f_noise = normal(0.0, self.white_noise, size=self.nexp)
-        flux = f_transit + squeeze(f_eclipse * (f_reflection + f_emission)) + f_noise
+        self.flux_noiseless = f_transit + squeeze(f_eclipse * (f_reflection + f_emission))
+        flux = self.flux_noiseless + f_noise
 
         # Approximate and remove SAA and Earth crossings
         phase = fold(self.time, CHEOPS_ORBIT.to(u.d).value, shift=-eff_phase) / CHEOPS_ORBIT.to(u.d).value
